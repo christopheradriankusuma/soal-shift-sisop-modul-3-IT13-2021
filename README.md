@@ -1536,8 +1536,46 @@ memset(&serv_addr, '0', sizeof(serv_addr));
 ## Kendala yang Dihadapi: 
 
 ## Screeshoot Hasil:
-
-
+1. Menyambungkan server dan client terlebih dahulu, kemudian setelah tersambung client dapat memasukkan pilihan login atau register. Karena di sini posisi Client belum mempunyai akun, maka client menginputkan pilihan register.
+![gambar](./Screenshoot/soal12.png)
+2. Setelah itu akan program akan membuat folder FILES yang nantinya akan diisi oleh file yang akan ditambahkan dan file akun.txt yang berisi list akun yang terdaftar.
+![gambar](./Screenshoot/soal13.png)
+3. Kemudian client akan melakukan login setelah register berjalan dengan baik dengan menginputkan pilihan login dan memasukkan id dan password akun yang terdaftar.
+![gambar](./Screenshoot/soal14.png)
+4. Di sini kami membuat 5 file pada folder client yaitu file1.txt hinggal file5.txt dengan isinya sebagai berikut.
+![gambar](./Screenshoot/soal15.png)
+![gambar](./Screenshoot/soal17.png)
+![gambar](./Screenshoot/soal16.png)
+![gambar](./Screenshoot/soal18.png)
+![gambar](./Screenshoot/soal19.png)
+5. Kemudian client dapat menambahkan file yang sudah dibuat tadi ke server dengan menginputkan command add yang nantinya client akan diminta untuk menginputkan Publisher, Tanggal publikasi, dan filepathnya. Kemudian dilanjut dengan client menambahkan 5 file yang sudah dibuat tadi ke server.
+![gambar](./Screenshoot/soal20.png)
+sehingga server menerima file tersebut dan menyimpannya pada folder FILES
+![gambar](./Screenshoot/soal21.png)
+6. Client dapat menginputkan command see untuk melihat apa saja file yang telah disimpan dan ditambahkan sebelumnya.
+![gambar](./Screenshoot/soal22.png)
+7. Client pun juga dapat mencari file yang ada pada server dengan menginputkan command find (nama file) sehingga nantinya client dapat melihat apakah file yang dicari tersedia di server.
+![gambar](./Screenshoot/soal23.png)
+8. Setelah itu, client juga dapat menginputkan command delete (nama file)untuk menghapus file yang telah ditambahkan sebelumnya pada server. Di sini file yang terhapus dari server akan direname dari  "nama file" ke "old-nama file". 
+![gambar](./Screenshoot/soal24.png)
+![gambar](./Screenshoot/soal25.png)
+9. Kemudian client juga dapat mendownload file dari server dengan menginputkan command download nama-file. Di sini kami akan mengubah isi dari file yang akan didownload pada server terlebih dahulu untuk membuktikan bahwa file yang terdownload dari server berjalan dengan baik. </br>
+(a) isi file2.txt sebelumnya pada client.
+![gambar](./Screenshoot/soal17.png)
+(b) isi file2.txt sebelumnya pada server.
+![gambar](./Screenshoot/soal34.png)
+(c) isi file2.txt setelah diubah pada server.
+![gambar](./Screenshoot/soal27.png)
+(d) client mendownload file2.txt yang isinya telah diubah
+![gambar](./Screenshoot/soal28.png)
+(e) isi file2.txt pada client setelah di download
+![gambar](./Screenshoot/soal29.png)
+10. Pada server terdapat akun.txt yang menyimpan daftar akun yang telah terdaftar. Berikut daftar akun yang terdaftar pada akun.txt.
+![gambar](./Screenshoot/soal31.png)
+Selain itu server juga menyimpan database berupa files.tsv yang berisi file-file yang sudah disimpan dan ditambahkan sebelumnya pada server.
+![gambar](./Screenshoot/soal32.png)
+Dan yang terakhir, pada server juga terdapat running.log yang merecord penambahan dan penghapusan file
+![gambar](./Screenshoot/soal33.png)
 ---
 
 ## Soal 2
