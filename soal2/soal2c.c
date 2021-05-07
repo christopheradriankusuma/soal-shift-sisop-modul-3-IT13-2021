@@ -6,7 +6,6 @@
  
 int main() {
 	pid_t child_id;
-	int status;
 	int fp1[2];
 	int fp2[2];
 	char output[1000];
@@ -33,7 +32,7 @@ int main() {
 		execv("/bin/ps", argv);
         exit(EXIT_SUCCESS);
 	} else {
-		while ((wait(&status)) > 0);
+		wait(NULL);
 		child_id = fork();
 		if (child_id < 0) {
 			exit(EXIT_FAILURE);
@@ -49,9 +48,10 @@ int main() {
 		} 
         else{
 			close(fp2[1]);
-			dup2(fp2[0], STDIN_FILENO);
             close(fp1[1]);
             close(fp1[0]);
+			wait(NULL);
+			dup2(fp2[0], STDIN_FILENO);
 			char *argv[] = {"head", "-5", NULL};
 			execv("/usr/bin/head", argv);
             exit(EXIT_SUCCESS);
