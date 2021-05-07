@@ -35,6 +35,7 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
   
+  // jika gagal menyambungkan ke server manapun maka tampil "Connection Failed"
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
         return -1;

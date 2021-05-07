@@ -9,16 +9,19 @@
 #include <ctype.h>
 #include <math.h>
 
+//mendefinisikan port server
 #define PORT 8080
 #define SO_REUSEPORT 15
 
 int n;
 
+//membuat struct user yg terdiri dari nama user dan password
 struct user {
     char name[50];
     char pwd[50];
 };
 
+//membuat struct file yang terdiri nama file dan path filenya
 struct file {
     char name[50];
     char path[50];
@@ -43,6 +46,7 @@ char *file_ext(char *file) {
     return ext;
 }
 
+// untuk melihat file yang ada telah dibuat
 char *see(struct file files[], int n) {
     char *buf;
     buf = (char *)malloc(sizeof(char) * 1024);
@@ -64,13 +68,14 @@ char *see(struct file files[], int n) {
         } else {
             sprintf(files[i].name, "%.*s", strlen(files[i].path) - 6, files[i].path + 6);
         }
-
+        
         sprintf(buf, "%s\nNama: %s\nPublisher: %s\nTahun publishing: %s\nEkstensi File: %s\nFilepath: %s\n", buf, files[i].name, files[i].publisher, files[i].year, files[i].ext, files[i].path);
     }
 
     return buf;
 }
 
+// untuk mencari user yang ada
 int find_user(char *name, char *pwd) {
     // printf("%s:%s %d:%d\n", name, pwd, strlen(name), strlen(pwd));
     int n = 0, mode = 0;
@@ -83,6 +88,7 @@ int find_user(char *name, char *pwd) {
     }
 
     FILE *fptr;
+    //membuka dan membaca di file akun.txt
     fptr = fopen("akun.txt", "r");
 
     fseek(fptr, 0, SEEK_END);
@@ -122,15 +128,20 @@ int find_user(char *name, char *pwd) {
     return 0;
 }
 
+//fungsi register
 void reg(char *name, char *pwd) {
     FILE *fptr;
+
+    //membuat file dengan nama akun.txt
     fptr = fopen("akun.txt", "a");
 
+    // isinya id sama password yg terdaftar
     fprintf(fptr, "%s:%s\n", name, pwd);
     
     fclose(fptr);
 }
 
+//membuat struct files yang akan menjadi databasenya
 struct file *parse_files() {
     n = 0;
     int mode = 0;
@@ -139,6 +150,7 @@ struct file *parse_files() {
     files = (struct file *)malloc(sizeof(struct file) * 50);
 
     for (int i = 0; i < 5; ++i) {
+        //data yang akan diisikan berupa nama file, path filenya, nama publisher dan tahun publishnya
         memset(files[i].ext, 0, sizeof(files[i].ext));
         memset(files[i].name, 0, sizeof(files[i].name));
         memset(files[i].path, 0, sizeof(files[i].path));
@@ -147,13 +159,16 @@ struct file *parse_files() {
     }
 
     FILE *fptr;
+    //membuka file.tsv untuk menambahkan data di atas
     fptr = fopen("files.tsv", "r");
 
-    fseek(fptr, 0, SEEK_END);
-    long fsize = ftell(fptr);
+    //untuk membaca file  mulai dari offset yang diinginkan
+    fseek(fptr, 0, SEEK_END); // offset dipindah relatif terhadap offset terakhir file.
+    long fsize = ftell(fptr); // mengembalikan nilai saat ini dari posisi identifier.
     rewind(fptr);
 
     char *str = (char *)malloc(sizeof(char) * (fsize + 1));
+    //membaca kalimat dalam sebuah FILE yang sudah dibuka di file.tsv
     fread(str, 1, fsize, fptr);
 
     for (int i = 0; i <= fsize; ++i) {
@@ -191,6 +206,7 @@ struct file *parse_files() {
     return files;
 }
 
+//fungsi delete untuk menghapus file yang sudah ditambahkan sebelumnya
 void delete(char *file) {
     struct file *files = parse_files();
     struct file *new_files = (struct file *)malloc(sizeof(struct file) * 50);
@@ -211,17 +227,22 @@ void delete(char *file) {
 
     if (j == n) return;
 
+    //nama file sebelum dihapus
     char old_name[50];
     sprintf(old_name, "FILES/%s", file);
 
+    //nama file setelah dihapus
     char new_name[50];
     sprintf(new_name, "FILES/old-%s", file);
 
+    //jika gagal merename nama file yang akan dihapus maka tampilkan "error renaming (nama file sebelum dihapus) to (nama file sesudah dihapus)"
     if (rename(old_name, new_name) < 0) {
         printf("error renaming %s to %s\n", old_name, new_name);
     }
 
     FILE *fptr;
+    
+    //membuka database file.tsv kemudian menuliskan atau mengedit yang ada di sana
     fptr = fopen("files.tsv", "w");
 
     for (int i = 0; i < j; ++i) {
@@ -276,6 +297,7 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // 
     mkdir("FILES", 0755);
 
     while (1) {
