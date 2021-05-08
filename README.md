@@ -2466,3 +2466,17 @@ else if (strcmp("*", argv[1]) == 0) {
 ## Kendala yang Dihadapi: 
 
 ## Screeshoot Hasil:
+1. Pertama membuat file berupa foto jpg, file dalam c, dan file dalam zip pada home. Seperti gambar berikut.
+![gambar](./Screenshoot/soal331.png)
+2. Kemudian jalankan program dengan ./soal3 -f path/to/file1.jpg path/to/file2.c path/to/file3.zip
+![gambar](./Screenshoot/soal332.png)
+3. Setelah itu, program akan mengategorikan file tersebut pada folder jpg, c, dan zip.
+![gambar](./Screenshoot/file333.png)
+4. Selain mengategorikan file, program juga dapat mengategorikan direktori. Pertama buat direktori seperti berikut. Isikan file dalam folder tersebut.
+![gambar](./Screenshoot/soal336.png)
+5. Kemudian jalankan program dengan ./soal3 -d path/to/direktori, maka program akan mengategorikan file di direktori tersebut berdasarkan tipe file ekstensinya.
+![gambar](./Screenshoot/file337.png)
+6. Selain itu, program juga dapat mengategorikan file dalam direktori saat ini. pertama buat filenya di direktori saat ini.
+![gambar](./Screenshoot/soal338.png)
+7. kemudian jalankan programnya. Maka program akan mengategorikan file-file tersebut berdasarkan tipe file ekstensinya.
+![gambar](./Screenshoot/soal339.png)
