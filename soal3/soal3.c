@@ -38,7 +38,7 @@ char *file_ext(char *file) {
     if (p == NULL) return "Unknown";
 
     char *ext;
-    ext = (char *)malloc(sizeof(char*) * 50);
+    ext = (char *)malloc(sizeof(char*) * 200);
     sprintf(ext, "%.*s", strlen(file) - (p - file + 1), p + 1);
     for (size_t i = 0; i < strlen(ext); ++i) {
         *(ext + i) = tolower(*(ext + i));
@@ -54,8 +54,8 @@ void *categorize_file(void *argv) {
 
     char ext[1024];
     sprintf(ext, "%s/%s", fd->should_be_active_directory, file_ext(fd->file_name));
-
     mkdir(ext, 0755);
+
     char new[1024];
     sprintf(new, "%s/%s", ext, fd->file_name);
 
@@ -91,19 +91,15 @@ void categorize_dir(char *directory_to_be_opened, char *should_be_active_directo
                 categorize_dir(d->d_name, should_be_active_directory, next_directory);
                 chdir("..");
             } else  {
-                sprintf(fds[current_thread].file_name, "%s", d->d_name);
-                sprintf(fds[current_thread].should_be_active_directory, "%s", should_be_active_directory);
-                sprintf(fds[current_thread].current_directory, "%s", current_directory);
+                strcpy(fds[current_thread].file_name, d->d_name);
+                strcpy(fds[current_thread].should_be_active_directory, should_be_active_directory);
+                strcpy(fds[current_thread].current_directory, current_directory);
 
                 pthread_create(&tid[current_thread], NULL, categorize_file, (void *)&fds[current_thread]);
                 ++current_thread;
             }
         }
     }
-    for (int i = 0; i < current_thread; ++i) {
-        pthread_join(tid[i], NULL);
-    }
-
 }
 
 void categorize_files(int argc, char *files[], char *should_be_active_directory) {
@@ -114,7 +110,7 @@ void categorize_files(int argc, char *files[], char *should_be_active_directory)
         sprintf(fds[current_thread].should_be_active_directory, "%s", should_be_active_directory);
         sprintf(fds[current_thread].current_directory, "%.*s", p - files[i], files[i]);
 
-        pthread_create(&tid[current_thread], NULL, categorize_file, (void *)&fds[current_thread]);
+        pthread_create(&tid[current_thread], NULL, &categorize_file, (void *)&fds[current_thread]);
         ++current_thread;
     }
 
@@ -146,6 +142,10 @@ int main(int argc, char *argv[]) {
 
         categorize_dir(dir, active_dir, dir);
 
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
+
         if (status) {
             printf("Direktori sukses disimpan!\n");
         } else {
@@ -158,6 +158,10 @@ int main(int argc, char *argv[]) {
         getcwd(dir, 1024);
 
         categorize_dir(dir, active_dir, active_dir);
+
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
 
         if (status) {
             printf("Direktori sukses disimpan!\n");
