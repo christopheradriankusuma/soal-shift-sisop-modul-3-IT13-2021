@@ -1848,8 +1848,278 @@ int main() {
 	}
 }
 ```
-### Penjelasan Code:
 
+### Penjelasan Code:
+<b>soal2a.c</b></br>
+1.Pertama tama dilakukan deklarasi untuk key, value, dan shmid. Disini variable value adalah variable dengan shared memory. Dideklarasikan juga variable untuk matriksnya.
+```C
+void main() {
+    key_t key = 1234;
+    ull *value;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    value = shmat(shmid, NULL, 0);
+
+    ull mat1[4][3]; // = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}};
+    ull mat2[3][6]; // = {{1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}, {13, 14, 15, 16, 17, 18}};
+```
+
+2. Dilakukan beberapa for loop untuk menerima input angka dari user yang dimasukan ke dalam matriks dan juga dilakukan perhitungan perkalian terhadap matriks-matriks tersebut setiap hasil dari perkalian matriks tersebut disimpan di variable value.
+```c
+for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            scanf("%llu", &mat1[i][j]);
+        }
+    }
+
+for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 6; ++j) {
+        scanf("%llu", &mat2[i][j]);
+    }
+}
+
+ull sum = 0;
+for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 6; ++j) {
+        for (int k = 0; k < 3; ++k) {
+            sum += mat1[i][k] * mat2[k][j];
+        }
+        *(value + 6*i + j) = sum;
+        sum = 0;
+    }
+}
+```
+3. dilakukan pelepasan shared memory untuk variable value dengan menggunakan shmdt dan shmctl.
+```c
+shmdt(value);
+shmctl(shmid, IPC_RMID, NULL);
+```
+
+<b>soal2b.c</b></br>
+
+1. Pertama-tama kita membuat struct dengan nama data yang berisikan 3 unsigned long long.
+```c
+typedef unsigned long long ull;
+
+struct data {
+    ull A;
+    ull B;
+    ull factorial;
+};
+```
+
+2. Untuk melakukan faktorial dari setiap cel kita membuat 2 function yang pertama merupakan function untuk melalukan faktorial dengan menerima 2 parameter dan me-return sebuah unsigned long long dan yang satunya adalah function pointer func dengan menerima arg sebagai parameter.
+```c
+ull custom_factorial(ull a, ull b) {
+    if (a == 0 || b == 0) return 0;
+    b = b > a ? a : b;
+
+    ull ans = 1;
+    for (ull i = a; i > a-b; --i) ans *= i;
+    return ans;
+}
+
+void *func(void *arg) {
+    struct data *d = (struct data *)arg;
+    d->factorial = custom_factorial(d->A, d->B);
+}
+```
+
+3. Dibuat variable value yang merupakan shared memory dan juga variable untuk melakukan thread yang nanti akan dijalankan.
+
+```c
+void main() {
+    key_t key = 1234;
+    ull *value;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    value = shmat(shmid, NULL, 0);
+
+    pthread_t tid[24];
+    struct data d[24];
+```
+
+4. Dilakukan 2 for loop untuk mengambil value berupa matriks dari shared memory yang telah diberikan pada soal2a.c dan for loop untuk mengambil input matriks dari user
+
+```c
+printf("Matriks A:\n");
+for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 6; ++j) {
+        printf("%llu\t", *(value + 6*i + j));
+        d[6*i + j].A = *(value + 6*i + j);
+    }
+    printf("\n");
+}
+printf("\n");
+
+ull matB[4][6];
+for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 6; ++j) {
+        scanf("%llu", &matB[i][j]);
+        d[6*i + j].B = matB[i][j];
+    }
+}
+```
+
+5. Dilakukan kembali 2 for loop untuk create thread dan thread join dengan thread yang menjalankan fungsi func.
+
+```c
+for (ull i = 0; i < 4; ++i) {
+    for (ull j = 0; j < 6; ++j) {
+        pthread_create(&tid[6*i + j], NULL, func, (void*)&d[6*i + j]);
+    }
+}
+
+for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 6; ++j) {
+        pthread_join(tid[6*i + j], NULL);
+    }
+}
+```
+
+6. Melakukan pelepasan shared memory dengan shmdt dan shmctl.
+
+```c
+shmdt(value);
+shmctl(shmid, IPC_RMID, NULL);
+```
+
+<b>soal2c.c</b></br>
+
+1. Dibuat variable child dan pipe untuk menjalankan program secara bertahap dan dilakukan pengecekan apakah pipe bernilai -1 atau tidka jika bernilai -1 maka pembuatan pipe gagal.
+
+```c
+int main() {
+	pid_t child_id;
+	int fp1[2];
+	int fp2[2];
+	char output[1000];
+	
+	if (pipe(fp1) == -1){
+		fprintf(stderr, "Pipe Failed" );
+		return 1;
+	}
+	
+	if (pipe(fp2) == -1){
+		fprintf(stderr, "Pipe Failed" );
+		return 1;
+	}
+```
+
+2. Dilakukan forking yang akan menjalankan beberapa program dengan pengecekan pada child_id
+
+```c
+child_id = fork();
+if (child_id < 0) {
+    exit(EXIT_FAILURE);
+}
+
+if (child_id == 0) {
+    close(fp1[0]);
+    dup2(fp1[1], STDOUT_FILENO);
+    char *argv[] = {"ps", "aux", NULL};
+    execv("/bin/ps", argv);
+    exit(EXIT_SUCCESS);
+} else {
+    wait(NULL);
+    child_id = fork();
+    if (child_id < 0) {
+        exit(EXIT_FAILURE);
+    }
+    if (child_id == 0){
+        close(fp1[1]);
+        dup2(fp1[0], STDIN_FILENO);
+        close(fp2[0]);
+        dup2(fp2[1], STDOUT_FILENO);
+        char *argv[] = {"sort", "-nrk 3,3", NULL};
+        execv("/usr/bin/sort", argv);
+        exit(EXIT_SUCCESS);
+    } 
+    else{
+        close(fp2[1]);
+        close(fp1[1]);
+        close(fp1[0]);
+        wait(NULL);
+        dup2(fp2[0], STDIN_FILENO);
+        char *argv[] = {"head", "-5", NULL};
+        execv("/usr/bin/head", argv);
+        exit(EXIT_SUCCESS);
+    }
+}
+```
+
+3. jika child_id == 0 maka akan dijalankan dan mengarahkan output ke pipe 1 berupa stdout dan melakukan exec berupa 'ps aux' untuk menampilkan proses yang berjalan
+
+```c
+if (child_id == 0) {
+		close(fp1[0]);
+		dup2(fp1[1], STDOUT_FILENO);
+		char *argv[] = {"ps", "aux", NULL};
+		execv("/bin/ps", argv);
+        exit(EXIT_SUCCESS);if (child_id == 0) {
+		close(fp1[0]);
+		dup2(fp1[1], STDOUT_FILENO);
+		char *argv[] = {"ps", "aux", NULL};
+		execv("/bin/ps", argv);
+        exit(EXIT_SUCCESS);
+```
+
+4. jika child_id != 0 maka akan masuk ke else yang dimana akan melukan forking juga dan mengecek apakah child_id kurang 0 , sama dengan 0 ataupun lebih dari 0.
+
+```c
+else {
+    wait(NULL);
+    child_id = fork();
+    if (child_id < 0) {
+        exit(EXIT_FAILURE);
+    }
+    if (child_id == 0){
+        close(fp1[1]);
+        dup2(fp1[0], STDIN_FILENO);
+        close(fp2[0]);
+        dup2(fp2[1], STDOUT_FILENO);
+        char *argv[] = {"sort", "-nrk 3,3", NULL};
+        execv("/usr/bin/sort", argv);
+        exit(EXIT_SUCCESS);
+    } 
+    else{
+        close(fp2[1]);
+        close(fp1[1]);
+        close(fp1[0]);
+        wait(NULL);
+        dup2(fp2[0], STDIN_FILENO);
+        char *argv[] = {"head", "-5", NULL};
+        execv("/usr/bin/head", argv);
+        exit(EXIT_SUCCESS);
+    }
+```
+
+5. Jika child_id sama dengan 0 maka program akan mengarahkan input ke pipe 1 berupa stdin_fileno dan dilanjutkan dengan mengarahkan output ke pipe 2 berupa stdout_fileno. Setelah mengarahkan pipe tersebut maka program akan menjalankan sorting.
+
+```c
+if (child_id == 0){
+    close(fp1[1]);
+    dup2(fp1[0], STDIN_FILENO);
+    close(fp2[0]);
+    dup2(fp2[1], STDOUT_FILENO);
+    char *argv[] = {"sort", "-nrk 3,3", NULL};
+    execv("/usr/bin/sort", argv);
+    exit(EXIT_SUCCESS);
+} 
+```
+
+6. Jika child_id lebih dari 0 maka program akan mengarahkan input kepada pipe 2 berupa stdin_fileno dan dilanjutkan menjalankan argumen untk menampilkan 5 baris awal.
+
+```c
+else{
+    close(fp2[1]);
+    close(fp1[1]);
+    close(fp1[0]);
+    wait(NULL);
+    dup2(fp2[0], STDIN_FILENO);
+    char *argv[] = {"head", "-5", NULL};
+    execv("/usr/bin/head", argv);
+    exit(EXIT_SUCCESS);
+}
+```
 
 ## Kendala yang Dihadapi: 
 
@@ -2092,6 +2362,106 @@ int main(int argc, char *argv[]) {
 ```
 
 ### Penjelasan
+
+1. di dalam int main terdapat 3 if else.
+
+```c
+if (strcmp("-f", argv[1]) == 0) {
+        if (argc < 3) err();
+
+        categorize_files(argc, argv, active_dir);
+    } else if (strcmp("-d", argv[1]) == 0) {
+        if (argc != 3) err();
+        mode = 1;
+
+        sprintf(dir, "%s", argv[2]);
+
+        categorize_dir(dir, active_dir, dir);
+
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
+
+        if (status) {
+            printf("Direktori sukses disimpan!\n");
+        } else {
+            printf("Yah, gagal disimpan :(\n");
+        }
+    } else if (strcmp("*", argv[1]) == 0) {
+        if (argc > 2) err();
+        mode = 1;
+
+        getcwd(dir, 1024);
+
+        categorize_dir(dir, active_dir, active_dir);
+
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
+
+        if (status) {
+            printf("Direktori sukses disimpan!\n");
+        } else {
+            printf("Yah, gagal disimpan :(\n");
+        }
+    } else {
+        err();
+    }
+```
+
+2. if yang pertama mengecek apakah argv berupa "-f" atau tidak jika iya maka program akan mengkategorikan file dengan menjalankan function categorize_files.
+
+```c
+if (strcmp("-f", argv[1]) == 0) {
+    if (argc < 3) err();
+
+    categorize_files(argc, argv, active_dir);
+```
+
+3. if yang kedua mengecek apakah argv berupa "-d" atau tidak jika iya maka program akan melakukan pengecekan kembali apakah argc tidak sama dengan 3 atau sama, jika tidak sama maka akan menjalankan error. Dilanjutkan dengan menjalankan function categorize_dir yang akan mengkategorikan file.
+
+```c
+else if (strcmp("-d", argv[1]) == 0) {
+    if (argc != 3) err();
+    mode = 1;
+
+    sprintf(dir, "%s", argv[2]);
+
+    categorize_dir(dir, active_dir, dir);
+
+    for (int i = 0; i < current_thread; ++i) {
+        pthread_join(tid[i], NULL);
+    }
+
+    if (status) {
+        printf("Direktori sukses disimpan!\n");
+    } else {
+        printf("Yah, gagal disimpan :(\n");
+    }
+```
+
+4. if yang terakhir mengecek apakah argv berupa "*" atau tidak, jika iya maka program akan megecek kembali apakah argc lebih dari 2, jika iya maka akan menjalankan error, namun jika tidak akan menjalankan function categorize_dir yang berfungsi untuk mengkategorikan file. Karena argv berupa "*" maka yang dikategorikan filenya adalah file yang di direktori saat ini
+
+```c
+else if (strcmp("*", argv[1]) == 0) {
+    if (argc > 2) err();
+    mode = 1;
+
+    getcwd(dir, 1024);
+
+    categorize_dir(dir, active_dir, active_dir);
+
+    for (int i = 0; i < current_thread; ++i) {
+        pthread_join(tid[i], NULL);
+    }
+
+    if (status) {
+        printf("Direktori sukses disimpan!\n");
+    } else {
+        printf("Yah, gagal disimpan :(\n");
+    }
+}
+```
 
 ## Kendala yang Dihadapi: 
 
