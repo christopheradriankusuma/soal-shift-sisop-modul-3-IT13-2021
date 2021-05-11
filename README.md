@@ -2289,9 +2289,6 @@ void categorize_dir(char *directory_to_be_opened, char *should_be_active_directo
             }
         }
     }
-    for (int i = 0; i < current_thread; ++i) {
-        pthread_join(tid[i], NULL);
-    }
 
 }
 
