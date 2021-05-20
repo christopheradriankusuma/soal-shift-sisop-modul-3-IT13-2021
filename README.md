@@ -1534,6 +1534,7 @@ memset(&serv_addr, '0', sizeof(serv_addr));
 ```
 
 ## Kendala yang Dihadapi: 
+Tidak ada
 
 ## Screeshoot Hasil:
 1. Menyambungkan server dan client terlebih dahulu, kemudian setelah tersambung client dapat memasukkan pilihan login atau register. Karena di sini posisi Client belum mempunyai akun, maka client menginputkan pilihan register.
@@ -2122,6 +2123,7 @@ else{
 ```
 
 ## Kendala yang Dihadapi: 
+Tidak ada
 
 ## Screeshoot Hasil:
 
@@ -2461,6 +2463,7 @@ else if (strcmp("*", argv[1]) == 0) {
 ```
 
 ## Kendala yang Dihadapi: 
+Tidak ada
 
 ## Screeshoot Hasil:
 1. Pertama membuat file berupa foto jpg, file dalam c, dan file dalam zip pada home. Seperti gambar berikut.
