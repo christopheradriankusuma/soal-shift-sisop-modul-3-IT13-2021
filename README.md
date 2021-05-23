@@ -2126,7 +2126,14 @@ else{
 Tidak ada
 
 ## Screeshoot Hasil:
-
+1. Compile seluruh file .c yang ada di dalam folder soal 2
+![gambar](./Screenshoot/soal210.png)
+2. Menjalankan soal2a yang akan meminta input berupa matriks 4x3 dan 3x6, serta dilakukan perhitungan matriks
+![gambar](./Screenshoot/soal211.png)
+3. Sebelum soal2a berada dalam keadaan mati, maka jalankan soal2b pada terminal yang lain. Soal2b akan meminta input berupa matriks 4x6 dan menjalankan perhitungan faktorial
+![gambar](./Screenshoot/soal212.png)
+4. Setelah soal2a dan soal2b dijalankan, dilanjutkan menjalankan soal2c yang akan menampilkan proses yang dijalankan.
+![gambar](./Screenshoot/soal213.png)
 
 ---
 
